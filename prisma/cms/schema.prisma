@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Content {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  title      String
+  category   String
+  summary    String
+  body       String
+  imageUrl   String   @default("")
+  tag        String   @default("")
+  readTime   Int      @default(5)
+  status     String   @default("draft")
+  featured   Boolean  @default(false)
+  sourceName String   @default("")
+  sourceUrl  String   @default("")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([status, category])
+}
+
+model SiteSettings {
+  id                  String   @id @default("main")
+  siteName            String
+  tagline             String
+  heroTitle           String
+  heroDescription     String
+  heroEyebrow         String   @default("A LITTLE KNOWLEDGE. A HEALTHIER YOU.")
+  heroImageUrl        String   @default("/images/hero-care.jpg")
+  heroImageCaption    String   @default("Good health starts with understanding.")
+  topicsTitle         String   @default("What would you like to explore?")
+  topicsDescription   String   @default("Clear answers, wherever you are on your health journey.")
+  featuredTitle       String   @default("A little more understanding.")
+  featuredDescription String   @default("Helpful reads for everyday health and a better-informed you.")
+  indexTitle          String   @default("Find it. Understand it.")
+  indexDescription    String   @default("Browse our growing health library, one letter at a time.")
+  missionTitle        String   @default("Health information should be for everyone.")
+  missionDescription  String   @default("We make medical knowledge easier to understand, so you can have more confident conversations about your health.")
+  aboutText           String
+  contactEmail        String
+  footerText          String   @default("A healthier world begins with a better-informed you.")
+  disclaimer          String   @default("For education only. This information does not replace medical advice, diagnosis, or treatment. Always speak with a qualified healthcare professional about your health.")
+  updatedAt           DateTime @updatedAt
+}
+
+model Admin {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  displayName  String         @default("Administrator")
+  passwordHash String
+  createdAt    DateTime       @default(now())
+  sessions     AdminSession[]
+}
+
+model AdminSession {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  adminId   String
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+}
+
+model LoginAttempt {
+  key         String   @id
+  attempts    Int      @default(0)
+  windowStart DateTime @default(now())
+}
