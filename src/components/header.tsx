@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import AccountControls from "@/components/account-controls";
 export default function Header() {
     return(
 
@@ -12,6 +14,9 @@ export default function Header() {
                     <Link href="/"> Home </Link>
                     <Link href="/#topics">Topics</Link>
                 </div>
+                <Suspense fallback={<span className="text-sm text-slate-500">Loading account…</span>}>
+                    <AccountControls />
+                </Suspense>
             </nav>
 
         </header>

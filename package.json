@@ -13,6 +13,7 @@
     "db:setup": "npm run db:generate && tsx scripts/prepare-database.ts && prisma migrate deploy --config prisma.config.ts && tsx prisma/seed.ts",
     "admin:create": "tsx scripts/create-admin.ts",
     "test:cms": "tsx scripts/test-cms.ts",
+    "test:membership": "tsx scripts/test-membership.ts",
     "prebuild": "npm run db:generate"
   },
   "dependencies": {

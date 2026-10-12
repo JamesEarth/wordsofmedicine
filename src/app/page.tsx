@@ -1,4 +1,6 @@
 import { Suspense } from "react";
+import { connection } from "next/server";
+import Link from "next/link";
 import { listPublishedContent } from "@/lib/db";
 
 export default function Home() {
@@ -35,6 +37,7 @@ export default function Home() {
 }
 
 async function PublishedArticles() {
+  await connection();
   const articles = await listPublishedContent();
 
   return (
@@ -47,31 +50,20 @@ async function PublishedArticles() {
 
       <div className="mt-6 flex flex-col gap-6">
         {articles.map((article) => (
-          <details
+          <article
             key={article.id}
             className="rounded-lg border border-slate-200 p-6"
           >
-            <summary className="cursor-pointer text-xl font-semibold">
-              {article.title}
-            </summary>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-teal-700">{article.category} · {article.readTime} min read</p>
+            <h3 className="text-xl font-semibold"><Link href={`/blog/${article.slug}`}>{article.title}</Link></h3>
 
             <p className="mt-4 text-slate-600">
               {article.summary}
             </p>
 
-            <p className="mt-4 whitespace-pre-wrap">
-              {article.body}
-            </p>
-
-            {article.sourceUrl && (
-              <a
-                href={article.sourceUrl}
-                className="mt-4 inline-block text-teal-700 underline"
-              >
-                Source: {article.sourceName}
-              </a>
-            )}
-          </details>
+            {article.requiresLogin && <p className="mt-3 text-sm font-medium text-slate-500">Members-only article</p>}
+            <Link href={`/blog/${article.slug}`} className="mt-4 inline-block font-semibold text-teal-700 underline">Read article</Link>
+          </article>
         ))}
       </div>
     </>

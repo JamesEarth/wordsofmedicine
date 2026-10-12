@@ -1,9 +1,10 @@
 import { listAdminContent } from "@/lib/db";
 import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth";
-import { logoutAction } from "@/lib/admin-actions";
+import { deleteContentAction, logoutAction } from "@/lib/admin-actions";
 import Link from "next/link";
 import PublishArticleForm from "@/components/admin/publish-article-form";
+import ActionForm from "@/components/action-form";
 
 export default function AdminPage() {
   return (
@@ -30,6 +31,9 @@ async function AdminDashboard() {
       >
         Create article
       </Link>
+      <Link href="/admin/members" className="ml-4 inline-block rounded-lg border border-teal-700 p-3 font-semibold text-teal-700">
+        Members & invitations
+      </Link>
       <section className="mt-8">
         <h2 className="text-xl font-semibold">
           Articles ({articles.length})
@@ -53,10 +57,18 @@ async function AdminDashboard() {
                 <p className="text-sm text-slate-600">
                   Status: {article.status}
                 </p>
+                <p className="mt-2 text-sm text-slate-600">{article.requiresLogin ? "Members only" : "Public"} · Comments {article.commentsEnabled ? "open" : "closed"}</p>
+                <div className="mt-4 flex gap-4 text-sm font-semibold text-teal-700">
+                  <Link href={`/admin/content/${article.id}/edit`}>Edit article</Link>
+                  {article.status === "published" && <Link href={`/blog/${article.slug}`}>View article</Link>}
+                </div>
 
                 {article.status === "draft" && (
                   <PublishArticleForm articleId={article.id} />
                 )}
+                <ActionForm action={deleteContentAction} label="Delete article" danger confirmText="Delete this article and all its comments and likes? This cannot be undone.">
+                  <input type="hidden" name="id" value={article.id} />
+                </ActionForm>
               </li>
             ))}
           </ul>

@@ -93,6 +93,8 @@ export async function saveContentAction(_previous: ActionState, form: FormData):
       readTime,
       status,
       featured: form.get("featured") === "on" || form.get("featured") === "true",
+      requiresLogin: form.get("requiresLogin") === "on",
+      commentsEnabled: form.get("commentsEnabled") === "on",
       sourceName,
       sourceUrl,
     };

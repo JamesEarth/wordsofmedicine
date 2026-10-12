@@ -32,11 +32,13 @@ export async function listPublishedContent() {
   return prisma.content.findMany({
     where: { status: "published" },
     orderBy: [{ featured: "desc" }, { createdAt: "asc" }],
+    select: { id: true, slug: true, title: true, summary: true, category: true, readTime: true, requiresLogin: true },
   });
 }
 
 export async function getPublishedContent(slug: string) {
-  return prisma.content.findFirst({ where: { slug, status: "published" } });
+  // This helper is safe for public callers. Member reads authorize separately.
+  return prisma.content.findFirst({ where: { slug, status: "published", requiresLogin: false } });
 }
 
 export async function getSettings() {
