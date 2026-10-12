@@ -1,25 +1,32 @@
 import "dotenv/config";
-import { resolve } from "node:path";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client";
 
 export type { Content, SiteSettings } from "../generated/prisma/client";
 
-const configuredUrl = process.env.CMS_DATABASE_URL ?? "file:./prisma/cms.db";
-if (!configuredUrl.startsWith("file:")) {
-  throw new Error("CMS_DATABASE_URL must be a SQLite file: URL.");
+const configuredUrl = process.env.DATABASE_URL;
+if (!configuredUrl || !/^postgres(?:ql)?:\/\//.test(configuredUrl)) {
+  throw new Error("DATABASE_URL must be a PostgreSQL connection URL.");
 }
-const globalDatabase = globalThis as unknown as { cmsPrisma?: PrismaClient };
+const globalDatabase = globalThis as unknown as {
+  postgresPrisma?: { connectionString: string; client: PrismaClient };
+};
+const cachedDatabase = globalDatabase.postgresPrisma;
 
+// A development reload must not reuse a client for a previous database/schema.
 export const prisma =
-  globalDatabase.cmsPrisma ??
-  new PrismaClient({
-    adapter: new PrismaBetterSqlite3({
-      url: `file:${resolve(configuredUrl.slice(5))}`,
-    }),
-  });
+  cachedDatabase?.connectionString === configuredUrl
+    ? cachedDatabase.client
+    : new PrismaClient({
+        adapter: new PrismaPg(
+          { connectionString: configuredUrl },
+          { schema: new URL(configuredUrl).searchParams.get("schema") ?? "public" },
+        ),
+      });
 
-if (process.env.NODE_ENV !== "production") globalDatabase.cmsPrisma = prisma;
+if (process.env.NODE_ENV !== "production") {
+  globalDatabase.postgresPrisma = { connectionString: configuredUrl, client: prisma };
+}
 
 export async function listPublishedContent() {
   return prisma.content.findMany({

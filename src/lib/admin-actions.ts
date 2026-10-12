@@ -167,3 +167,45 @@ export async function saveSettingsAction(_previous: ActionState, form: FormData)
   revalidatePath("/", "layout");
   return { success: "Website settings saved. Your changes are now live." };
 }
+
+export async function publishContentAction(
+  _previous: ActionState,
+  form: FormData
+): Promise<ActionState> {
+  await requireAdmin();
+
+  let id: string;
+  let sourceName: string;
+  let sourceUrl: string;
+
+  try {
+    id = field(form, "id", 100);
+    sourceName = field(form, "sourceName", 200);
+    sourceUrl = field(form, "sourceUrl", 2000);
+
+    validateUrl(sourceUrl, "Source URL");
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "Please check the source details.",
+    };
+  }
+
+  try {
+    await prisma.content.update({
+      where: { id },
+      data: {
+        status: "published",
+        sourceName,
+        sourceUrl,
+      },
+    });
+  } catch (error) {
+    return { error: databaseError(error) };
+  }
+
+  revalidatePath("/", "layout");
+  redirect("/admin");
+}

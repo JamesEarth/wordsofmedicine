@@ -1,14 +1,24 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth";
-import { getSettings } from "@/lib/db";
-import { AdminShell } from "@/components/admin/admin-shell";
-import { ContentForm } from "@/components/admin/content-form";
+import CreateArticleForm from "@/components/admin/create-article-form";
 
-export const metadata = { title: "Create content" };
+export default function NewArticlePage() {
+  return (
+    <main className="mx-auto max-w-2xl px-6 py-16">
+      <Suspense fallback={<p>Checking your session…</p>}>
+        <ProtectedArticleForm />
+      </Suspense>
+    </main>
+  );
+}
 
-export default async function NewContentPage() {
-  const admin = await requireAdmin();
-  const settings = await getSettings();
-  return <AdminShell email={admin.email} displayName={admin.displayName} siteName={settings.siteName}><Link href="/admin" className="admin-back-link"><ArrowLeft size={16} />Content library</Link><header className="admin-page-heading"><div><span className="admin-eyebrow">A NEW PAGE OF KNOWLEDGE</span><h1>Create content</h1><p>Turn helpful information into an accessible guide.</p></div></header><ContentForm /></AdminShell>;
+async function ProtectedArticleForm() {
+  await requireAdmin();
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold">Create article</h1>
+      <CreateArticleForm />
+    </div>
+  );
 }

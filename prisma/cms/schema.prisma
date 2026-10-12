@@ -1,6 +1,7 @@
+// Archived SQLite schema. The application uses ../schema.prisma (PostgreSQL).
 generator client {
   provider = "prisma-client"
-  output   = "../../src/generated/prisma"
+  output   = "../../src/generated/legacy-cms"
 }
 
 datasource db {

@@ -41,12 +41,14 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+/src/generated/legacy-cms
 
 # Local CMS records and authentication data
 *.db
 *.db-journal
 *.db-wal
 *.db-shm
+*.db.backup
 /playwright-report/
 /test-results/
 !.env.example
